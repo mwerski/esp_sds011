@@ -69,7 +69,6 @@ public:
     bool query_data(int& pm25, int& pm10);
     bool query_data(int& pm25, int& pm10, int n);
     bool query_data_auto(int& pm25, int& pm10);
-    bool timeout();
     bool crc_ok();
 
     bool filter_data(int n, const int* pm25_table, const int* pm10_table, int& pm25, int& pm10);
@@ -85,14 +84,15 @@ protected:
     };
 
     void _send_cmd(enum Command cmd, const uint8_t* buf, uint8_t len);
-    int _read_byte(long unsigned deadline);
+    int _read_byte();
     String _buf_to_string(uint8_t size);
     void _clear_responses();
     bool _read_response(enum Command cmd);
 
     Stream& _out;
     uint8_t _buf[19];
-    bool _timeout = false;
+    uint32_t _read_response_start;
+    static constexpr uint32_t _read_response_deadline = 1010;
 
     unsigned rampup_s = 10;
 };
