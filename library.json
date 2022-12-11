@@ -1,6 +1,6 @@
 {
     "name": "esp_sds011",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "ESP8266/ESP32 library for the SDS011 particulate matter sensor",
     "keywords": [
       "sds011"
