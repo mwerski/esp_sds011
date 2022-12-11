@@ -267,6 +267,7 @@ bool Sds011Async_Base::query_data_auto_async(int n, int* pm25_table, int* pm10_t
     query_data_auto_pm10_ptr = pm10_table;
     query_data_auto_collected = 0;
 
+    _clear_responses();
     query_data_auto_state = QDA_WAITCOLLECT;
     onReceive([this](int available) {
         int estimatedMsgCnt = available / 10;
@@ -286,7 +287,7 @@ bool Sds011Async_Base::query_data_auto_async(int n, int* pm25_table, int* pm10_t
             onReceive([this](int available) {
                 uint32_t deadlineExpired = millis() - query_data_auto_start;
                 if (deadlineExpired < query_data_auto_deadline) {
-                    _get_out().flush();
+                    _clear_responses();
                     return;
                 }
                 int pm25;

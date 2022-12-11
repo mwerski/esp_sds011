@@ -154,7 +154,6 @@ protected:
     S& _get_out() { return static_cast<S&>(_out); }
     void onReceive(Delegate<void(int available), void*> handler) override {
         receiveHandler = handler;
-        _get_out().onReceive(nullptr);
     }
 
     Delegate<void(int available), void*> receiveHandler;
