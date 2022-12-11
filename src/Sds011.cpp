@@ -163,7 +163,7 @@ void Sds011::_send_cmd(enum Command cmd, const uint8_t* data, uint8_t len) {
     _buf[17] = crc;
 
     _clear_responses();
-    _out.write(_buf, sizeof(_buf));
+    _get_out().write(_buf, sizeof(_buf));
 }
 
 // _read_byte returns timeout (-1) regardless of pending data
@@ -172,16 +172,16 @@ int Sds011::_read_byte() {
     for (;;) {
         const uint32_t deadlineExpired = millis() - _read_response_start;
         if (deadlineExpired >= _read_response_deadline) return -1;
-        if (_out.available()) break;
+        if (_get_out().available()) break;
         delay(1);
     }
-    return _out.read();
+    return _get_out().read();
 }
 
 void Sds011::_clear_responses() {
-    _out.flush();
-    auto avail = _out.available();
-    while (avail-- && _out.read() >= 0) {}
+    _get_out().flush();
+    auto available = _get_out().available();
+    while (available-- && _get_out().read() >= 0) {}
 }
 
 bool Sds011::_read_response(enum Command cmd) {
@@ -268,8 +268,8 @@ bool Sds011Async_Base::query_data_auto_async(int n, int* pm25_table, int* pm10_t
     query_data_auto_collected = 0;
 
     query_data_auto_state = QDA_WAITCOLLECT;
-    onReceive([this](int avail) {
-        int estimatedMsgCnt = avail / 10;
+    onReceive([this](int available) {
+        int estimatedMsgCnt = available / 10;
         int pm25;
         int pm10;
         int dataAutoCnt = 0;
@@ -283,7 +283,7 @@ bool Sds011Async_Base::query_data_auto_async(int n, int* pm25_table, int* pm10_t
             query_data_auto_state = QDA_RAMPUP;
             query_data_auto_start = millis();
             query_data_auto_deadline = (rampup_s - dataAutoCnt) * 1000UL;
-            onReceive([this](int avail) {
+            onReceive([this](int available) {
                 uint32_t deadlineExpired = millis() - query_data_auto_start;
                 if (deadlineExpired < query_data_auto_deadline) {
                     _get_out().flush();
@@ -292,19 +292,19 @@ bool Sds011Async_Base::query_data_auto_async(int n, int* pm25_table, int* pm10_t
                 int pm25;
                 int pm10;
                 // discard estimated msgs prior to deadline expiration
-                while (avail >= 10 && deadlineExpired - query_data_auto_deadline >= 1000UL) {
-                    avail -= 10;
+                while (available >= 10 && deadlineExpired - query_data_auto_deadline >= 1000UL) {
+                    available -= 10;
                     if (query_data_auto(pm25, pm10)) deadlineExpired -= 1000UL;
                 }
 
                 query_data_auto_state = QDA_COLLECTING;
                 query_data_auto_start = millis();
                 query_data_auto_deadline = 1000UL / 4UL * rampup_s;
-                onReceive([this](int avail) {
+                onReceive([this](int available) {
                     int pm25;
                     int pm10;
-                    while (avail >= 10 && query_data_auto_collected < query_data_auto_n) {
-                        avail -= 10;
+                    while (available >= 10 && query_data_auto_collected < query_data_auto_n) {
+                        available -= 10;
                         if (query_data_auto(pm25, pm10)) {
                             *query_data_auto_pm25_ptr++ = pm25;
                             *query_data_auto_pm10_ptr++ = pm10;

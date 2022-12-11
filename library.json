@@ -23,7 +23,7 @@
     "dependencies": [
         {
             "name": "EspSoftwareSerial",
-            "version": "~6.12.3"
+            "version": "~7.0.0"
         }
     ]
 }
