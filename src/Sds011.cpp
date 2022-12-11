@@ -129,10 +129,6 @@ bool Sds011::query_data_auto(int& pm25, int& pm10) {
     return true;
 }
 
-bool Sds011::timeout() {
-    return _timeout;
-}
-
 bool Sds011::crc_ok() {
     uint8_t crc = 0;
     for (int i = 2; i < 8; ++i) {
@@ -170,18 +166,15 @@ void Sds011::_send_cmd(enum Command cmd, const uint8_t* data, uint8_t len) {
     _out.write(_buf, sizeof(_buf));
 }
 
-int Sds011::_read_byte(long unsigned deadline) {
-    uint32_t start = millis();
-    while (!_out.available()) {
-        if (millis() - start < deadline) {
-            delay(1);
-            continue;
-        }
-        _timeout = true;
-        return -1;
+// _read_byte returns timeout (-1) regardless of pending data
+// if _read_response_deadline has expired.
+int Sds011::_read_byte() {
+    for (;;) {
+        const uint32_t deadlineExpired = millis() - _read_response_start;
+        if (deadlineExpired >= _read_response_deadline) return -1;
+        if (_out.available()) break;
+        delay(1);
     }
-
-    _timeout = false;
     return _out.read();
 }
 
@@ -193,10 +186,12 @@ void Sds011::_clear_responses() {
 
 bool Sds011::_read_response(enum Command cmd) {
     uint8_t i = 0;
-    const long unsigned deadline = 1000;
+    int recv;
+    _read_response_start = millis();
     while (i < 3) {
-        _buf[i] = _read_byte(deadline);
-        if (timeout()) { break; }
+        recv = _read_byte();
+        if (0 > recv) { break; }
+        _buf[i] = recv;
         switch (i++) {
         case 0: if (_buf[0] != 0xAA) i = 0; break;
         case 1: if (_buf[1] != ((cmd == CMD_QUERY_DATA) ? 0xC0 : 0xC5)) i = 0; break;
@@ -204,11 +199,12 @@ bool Sds011::_read_response(enum Command cmd) {
         }
     }
     for (i = 3; i < 10; i++) {
-        if (timeout()) { break; }
-        _buf[i] = _read_byte(deadline);
+        if (0 > recv) { break; }
+        recv = _read_byte();
+        _buf[i] = recv;
     }
 
-    bool succ = !timeout() && _buf[9] == 0xAB;
+    bool succ = !(0 > recv) && _buf[9] == 0xAB;
     return succ;
 }
 
@@ -288,7 +284,7 @@ bool Sds011Async_Base::query_data_auto_async(int n, int* pm25_table, int* pm10_t
             query_data_auto_start = millis();
             query_data_auto_deadline = (rampup_s - dataAutoCnt) * 1000UL;
             onReceive([this](int avail) {
-                unsigned long deadlineExpired = millis() - query_data_auto_start;
+                uint32_t deadlineExpired = millis() - query_data_auto_start;
                 if (deadlineExpired < query_data_auto_deadline) {
                     _get_out().flush();
                     return;
