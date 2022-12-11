@@ -166,14 +166,14 @@ void Sds011::_send_cmd(enum Command cmd, const uint8_t* data, uint8_t len) {
     _out.write(_buf, sizeof(_buf));
 }
 
+// _read_byte returns timeout (-1) regardless of pending data
+// if _read_response_deadline has expired.
 int Sds011::_read_byte() {
-    while (!_out.available()) {
+    for (;;) {
         const uint32_t deadlineExpired = millis() - _read_response_start;
-        if (deadlineExpired < _read_response_deadline) {
-            delay(1);
-            continue;
-        }
-        return -1;
+        if (deadlineExpired >= _read_response_deadline) return -1;
+        if (_out.available()) break;
+        delay(1);
     }
     return _out.read();
 }
@@ -189,8 +189,7 @@ bool Sds011::_read_response(enum Command cmd) {
     int recv;
     _read_response_start = millis();
     while (i < 3) {
-        const uint32_t deadlineExpired = millis() - _read_response_start;
-        recv = (deadlineExpired > _read_response_deadline) ? -1 : _read_byte();
+        recv = _read_byte();
         if (0 > recv) { break; }
         _buf[i] = recv;
         switch (i++) {
