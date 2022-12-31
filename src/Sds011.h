@@ -90,6 +90,7 @@ protected:
     bool _read_response(enum Command cmd);
 
     Stream& _out;
+    Stream& _get_out() { return _out; }
     uint8_t _buf[19];
     uint32_t _read_response_start;
     static constexpr uint32_t _read_response_deadline = 1010;
@@ -119,7 +120,6 @@ public:
     }
 
 protected:
-    Stream& _get_out() { return _out; }
     virtual void onReceive(Delegate<void(int available), void*> handler) = 0;
 
     void perform_work_query_data_auto();
@@ -143,15 +143,20 @@ public:
     }
 
     void perform_work() override {
-        _get_out().perform_work();
+        if (receiveHandler) {
+            int available = _get_out().available();
+            if (available) { receiveHandler(available); }
+        }
         Sds011Async_Base::perform_work();
     }
 
 protected:
     S& _get_out() { return static_cast<S&>(_out); }
     void onReceive(Delegate<void(int available), void*> handler) override {
-        _get_out().onReceive(handler);
+        receiveHandler = handler;
     }
+
+    Delegate<void(int available), void*> receiveHandler;
 };
 
 template<> class Sds011Async<HardwareSerial> : public Sds011Async_Base {
@@ -161,8 +166,8 @@ public:
 
     void perform_work() override {
         if (receiveHandler) {
-            int avail = _get_out().available();
-            if (avail) { receiveHandler(avail); }
+            int available = _get_out().available();
+            if (available) { receiveHandler(available); }
         }
         Sds011Async_Base::perform_work();
     }
