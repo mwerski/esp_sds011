@@ -14,8 +14,8 @@
 HardwareSerial& serialSDS(Serial2);
 Sds011Async< HardwareSerial > sds011(serialSDS);
 #else
-SoftwareSerial serialSDS;
-Sds011Async< SoftwareSerial > sds011(serialSDS);
+SoftwareSerial::UART serialSDS;
+Sds011Async< SoftwareSerial::UART > sds011(serialSDS);
 #endif
 
 bool is_SDS_running = true;
@@ -42,10 +42,10 @@ void setup()
     Serial.begin(115200);
 
 #ifdef ESP32
-    serialSDS.begin(9600, SERIAL_8N1, SDS_PIN_RX, SDS_PIN_TX);
+    serialSDS.begin(9600, ::SERIAL_8N1, SDS_PIN_RX, SDS_PIN_TX);
     delay(100);
 #else
-    serialSDS.begin(9600, SWSERIAL_8N1, SDS_PIN_RX, SDS_PIN_TX, false, 192);
+    serialSDS.begin(9600, SoftwareSerial::SERIAL_8N1, SDS_PIN_RX, SDS_PIN_TX, false, 192);
 #endif
 
     Serial.println("SDS011 start/stop and reporting sample");

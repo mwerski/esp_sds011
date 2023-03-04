@@ -14,8 +14,8 @@
 HardwareSerial& serialSDS(Serial2);
 Sds011Async< HardwareSerial > sds011(serialSDS);
 #else
-SoftwareSerial serialSDS;
-Sds011Async< SoftwareSerial > sds011(serialSDS);
+SoftwareSerial::UART serialSDS;
+Sds011Async< SoftwareSerial::UART > sds011(serialSDS);
 #endif
 
 // The example stops the sensor for 210s, then runs it for 30s, then repeats.
@@ -56,14 +56,22 @@ void setup()
     serialSDS.begin(9600, SERIAL_8N1, SDS_PIN_RX, SDS_PIN_TX);
     delay(100);
 #else
-    serialSDS.begin(9600, SWSERIAL_8N1, SDS_PIN_RX, SDS_PIN_TX, false, 192);
+    serialSDS.begin(9600, SoftwareSerial::SERIAL_8N1, SDS_PIN_RX, SDS_PIN_TX, false, 192);
 #endif
 
     Serial.println("SDS011 start/stop and reporting sample");
 
     Sds011::Report_mode report_mode;
-    if (!sds011.get_data_reporting_mode(report_mode)) {
-        Serial.println("Sds011::get_data_reporting_mode() failed");
+    constexpr int GETDATAREPORTINMODE_MAXRETRIES = 2;
+    for (auto retry = 1; retry <= GETDATAREPORTINMODE_MAXRETRIES; ++retry) {
+        if (!sds011.get_data_reporting_mode(report_mode)) {
+            if (retry == GETDATAREPORTINMODE_MAXRETRIES) {
+                Serial.println("Sds011::get_data_reporting_mode() failed");
+            }
+        }
+        else {
+            break;
+        }
     }
     if (Sds011::REPORT_ACTIVE != report_mode) {
         Serial.println("Turning on Sds011::REPORT_ACTIVE reporting mode");
