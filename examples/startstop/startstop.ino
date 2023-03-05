@@ -42,10 +42,10 @@ void setup()
     Serial.begin(115200);
 
 #ifdef ESP32
-    serialSDS.begin(9600, ::SERIAL_8N1, SDS_PIN_RX, SDS_PIN_TX);
+    serialSDS.begin(9600, SERIAL_8N1, SDS_PIN_RX, SDS_PIN_TX);
     delay(100);
 #else
-    serialSDS.begin(9600, EspSoftwareSerial::SERIAL_8N1, SDS_PIN_RX, SDS_PIN_TX, false, 192);
+    serialSDS.begin(9600, SWSERIAL_8N1, SDS_PIN_RX, SDS_PIN_TX, false, 192);
 #endif
 
     Serial.println("SDS011 start/stop and reporting sample");
