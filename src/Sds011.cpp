@@ -314,7 +314,7 @@ bool Sds011Async_Base::query_data_auto_async(int n, int* pm25_table, int* pm10_t
                         query_data_auto_start = millis();
                     }
                     if (query_data_auto_collected >= query_data_auto_n) {
-                        if (query_data_auto_handler) query_data_auto_handler(query_data_auto_collected);
+                        query_data_auto_handler(query_data_auto_collected);
                         query_data_auto_handler = nullptr;
                         query_data_auto_state = QDA_OFF;
                         query_data_auto_pm25_ptr = 0;
@@ -333,7 +333,7 @@ void Sds011Async_Base::perform_work_query_data_auto() {
     // check if collecting deadline has expired
     if (QDA_COLLECTING == query_data_auto_state &&
         millis() - query_data_auto_start > query_data_auto_deadline) {
-        if (query_data_auto_handler) query_data_auto_handler(query_data_auto_collected);
+        query_data_auto_handler(query_data_auto_collected);
         query_data_auto_handler = nullptr;
         query_data_auto_state = QDA_OFF;
         query_data_auto_pm25_ptr = 0;
