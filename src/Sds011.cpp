@@ -41,7 +41,7 @@ bool Sds011::device_info(String& firmware_version, uint16_t& device_id) {
 }
 
 bool Sds011::set_data_reporting_mode(Report_mode mode) {
-    uint8_t data[] = { 0x1, mode };
+    uint8_t data[] { 0x1, mode };
     _send_cmd(CMD_DATA_REPORTING_MODE, data, 2);
     return _read_response(CMD_DATA_REPORTING_MODE) && crc_ok() && _buf[3] == 0x1 && _buf[4] == mode;
 }
@@ -55,13 +55,13 @@ bool Sds011::get_data_reporting_mode(Report_mode& mode) {
 }
 
 bool Sds011::set_device_id(uint16_t device_id) {
-    uint8_t data[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, static_cast<uint8_t>(device_id >> 8), static_cast<uint8_t>(device_id & 0xff) };
+    uint8_t data[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, static_cast<uint8_t>(device_id >> 8), static_cast<uint8_t>(device_id & 0xff) };
     _send_cmd(CMD_SET_DEVICE_ID, data, 12);
     return _read_response(CMD_SET_DEVICE_ID) && crc_ok() && _buf[6] == device_id >> 8 && _buf[7] == (device_id & 0xff);
 }
 
 bool Sds011::set_sleep(bool sleep) {
-    uint8_t data[] = { 0x1, !sleep };
+    uint8_t data[] { 0x1, !sleep };
     _send_cmd(CMD_SLEEP_AND_WORK, data, 2);
     return _read_response(CMD_SLEEP_AND_WORK) && crc_ok() && _buf[3] == 0x1 && !_buf[4] == sleep;
 }
@@ -75,7 +75,7 @@ bool Sds011::get_sleep(bool& sleep) {
 }
 
 bool Sds011::set_working_period(uint8_t minutes) {
-    uint8_t data[] = { 0x1, minutes };
+    uint8_t data[] { 0x1, minutes };
     _send_cmd(CMD_WORKING_PERIOD, data, 2);
     return _read_response(CMD_WORKING_PERIOD) && crc_ok() && _buf[3] == 0x1 && _buf[4] == minutes;
 }
