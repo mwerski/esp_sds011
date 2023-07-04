@@ -1,5 +1,5 @@
 /*
-Sds011.h
+esp_sds011.h
 
 ESP8266/ESP32 Arduino library for the SDS011 particulation matter sensor.
 
@@ -27,8 +27,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef _SDS011_H
-#define _SDS011_H
+#ifndef _ESP_SDS011_H
+#define _ESP_SDS011_H
 
 #if ARDUINO >= 100
 #include "Arduino.h"
@@ -181,4 +181,4 @@ protected:
     Delegate<void(int available), void*> receiveHandler;
 };
 
-#endif
+#endif // _ESP_SDS011_H

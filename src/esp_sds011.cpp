@@ -1,5 +1,5 @@
 /*
-Sds011.cpp
+esp_sds011.cpp
 
 ESP8266/ESP32 Arduino library for the SDS011 particulation matter sensor.
 
@@ -27,7 +27,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "Sds011.h"
+#include "esp_sds011.h"
 
 bool Sds011::device_info(String& firmware_version, uint16_t& device_id) {
     _send_cmd(CMD_FIRMWARE_VERSION, NULL, 0);

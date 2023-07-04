@@ -5,7 +5,7 @@
 */
 
 #include <SoftwareSerial.h>
-#include <Sds011.h>
+#include <esp_sds011.h>
 
 #define SDS_PIN_RX D7
 #define SDS_PIN_TX D8
